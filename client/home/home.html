@@ -1,0 +1,295 @@
+<template name="home">
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-12 mb-5">
+                {{#each getTransactions}}
+                {{#each applied}}
+                {{> txWithoutEndorsementstemplate}}
+                {{/each}}
+                {{/each}}
+            </div>
+            <!--  -->
+
+            <div class="col-lg-9 col-md-8 col-12">
+                <h1 class="text-info text-center">
+                    <strong>Tezos Live Mempool</strong>
+                </h1>
+                <hr>
+                <div class="row">
+                    <div class="col text-center">
+                        <h6>
+                            <strong> #{{numberOfApplied}} TX Waiting to be inserted
+                            </strong>
+                            <br>
+                            <small class="text-muted">
+                                {{numberOfEndorsements}} of which are Endorsements
+                            </small>
+                        </h6>
+                    </div>
+                    <!--  -->
+                    <div class="col text-center">
+                        <h5>
+                            <small class="text-muted">
+                                actual block
+                            </small>
+                            <br>
+                            <span class="badge badge-primary">#{{getInfo.level}}</span>
+                        </h5>
+                    </div>
+                    <!--  -->
+                    <div class="col text-center">
+                        <h5>
+                            actual cycle
+                            <br>
+                            <span class="badge badge-success">#{{getInfo.cycle}}</span>
+                        </h5>
+                    </div>
+                    <!--  -->
+                    <div class="col-12 text-center mt-2">
+
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                aria-valuenow="{{cycleProgress}}" aria-valuemin="0" aria-valuemax="100"
+                                style="width: {{cycleProgress}}%"></div>
+                        </div>
+                        <small class="text-muted">next cycle {{momentFromNow nextCycle}} </small>
+
+                    </div>
+                </div>
+                <!--  -->
+                <div class="row mt-5">
+                    <div class="col">
+                        <h6 class="">
+                            <strong>{{numberOfRefused}}</strong> Refused TX
+                        </h6>
+                        <br>
+                        {{#each getTransactions}}
+                        {{#each refused}}
+                        {{> txtemplate}}
+                        {{/each}}
+                        {{/each}}
+                    </div>
+                    <!--  -->
+                    <div class="col">
+                        <h6 class="">
+                            <strong>{{numberOfBranchRefused}}</strong> Branch Refused TX
+                        </h6>
+                        <br>
+                        {{#each getTransactions}}
+                        {{#each branch_refused}}
+                        {{#each this}}
+                        {{> txtemplate}}
+                        {{/each}}
+                        {{/each}}
+                        {{/each}}
+                    </div>
+                    <!--  -->
+                    <div class="col">
+                        <h6 class="">
+                            <strong>{{numberOfBranchDelayed}}</strong> Branch Delayed TX
+                        </h6>
+                        <br>
+                        {{#each getTransactions}}
+                        {{#each branch_delayed}}
+                        {{#each this}}
+                        {{> txtemplate}}
+                        {{/each}}
+                        {{/each}}
+                        {{/each}}
+                    </div>
+                    <!--  -->
+                    <div class="col">
+                        <h6 class="">
+                            <strong>{{numberOfUnprocessed}}</strong> Unprocessed TX
+                        </h6>
+                        <br>
+                        {{#each getTransactions}}
+                                {{#each unprocessed}}
+                                {{> txtemplate}}
+                                {{/each}}
+                                {{/each}}
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-lg-1">
+                {{#each last10}}
+                <div class="bg-white p-2 shadow-lg text-center rounded mb-3">
+                    <h6>
+                        <small class="text-muted">
+                            view on blockchain
+                        </small>
+                        <br>
+                        <a href="https://tezblock.io/block/{{level}}" class="text-decoration-none" target="_blank">
+                            block #{{level}}
+                        </a>
+                    </h6>
+                </div>
+                {{/each}}
+            </div> -->
+        </div>
+    </div>
+</template>
+
+<template name="txtemplate">
+    {{#each contents}}
+    <!--  -->
+    {{#if isTransaction kind}}
+    <small class="is-size-7">
+        source: <strong>{{source}}</strong>
+    </small>
+    <br>
+    <small class="is-size-7">
+        destination: <strong>{{destination}}</strong>
+    </small>
+    <br>
+    <span class="tag is-info is-uppercase">{{kind}}</span>
+    <strong>
+        <span class="tag is-black">
+            {{divideByMilion amount}} tz
+        </span>
+    </strong>
+    <br>
+    {{/if}}
+    <!--  -->
+    {{#if isEndorsement kind}}
+    <small class="is-size-7">
+        block: <strong>{{level}}</strong>
+    </small>
+    <br>
+    <span class="tag is-warning is-uppercase">{{kind}}</span>
+    <br>
+    {{/if}}
+    <!--  -->
+    {{#if isReveal kind}}
+    <small class="is-size-7">
+        source: <strong>{{source}}</strong>
+    </small>
+    <br>
+    <span class="tag is-dark is-uppercase">{{kind}}</span>
+    <br>
+    {{/if}}
+    <!--  -->
+    {{#if isDelegation kind}}
+    <small class="is-size-7">
+        source: <strong>{{source}}</strong>
+    </small>
+    <br>
+    <span class="tag is-success is-uppercase">{{kind}}</span>
+    <br>
+    {{/if}}
+    <!--  -->
+    {{/each}}
+</template>
+
+<template name="txWithoutEndorsementstemplate">
+    {{#each contents}}
+    <!--  -->
+    {{#if isTransaction kind}}
+    <div class="row mb-3">
+        <div class="col-4 text-break text-right align-self-center">
+            <h6>
+                <span class="badge badge-info shadow text-uppercase">
+                    {{kind}}
+                </span>
+                <br>
+                <span class="badge badge-dark shadow-lg">
+                    {{divideByMilion amount}} tz
+                </span>
+            </h6>
+        </div>
+        <div class="col-8 text-break">
+            <div class="card-1 bg-white rounded p-3">
+                <h6>
+                    <small>
+                        <span class="text-uppercase text-muted">
+                            source
+                        </span>
+                        <a href="https://tezblock.io/account/{{source}}" class="text-decoration-none" target="_blank">
+                            <strong>{{source}}</strong>
+                        </a>
+                        <br>
+                        <span class="text-uppercase text-muted">
+                            destination
+                        </span>
+                        <a href="https://tezblock.io/account/{{destination}}" class="text-decoration-none"
+                            target="_blank">
+                            <strong>{{destination}}</strong>
+                        </a>
+                    </small>
+                </h6>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    <!--  -->
+    <!-- {{#if isEndorsement kind}}
+    <small class="is-size-7">
+        block: <strong>{{level}}</strong>
+    </small>
+    <br>
+    <span class="tag is-warning is-uppercase">{{kind}}</span>
+    <br>
+    {{/if}} -->
+    <!--  -->
+    {{#if isReveal kind}}
+    <div class="row mb-3">
+        <div class="col-4 text-break text-right align-self-center">
+            <h6>
+                <span class="badge badge-secondary shadow text-uppercase">
+                    {{kind}}
+                </span>
+            </h6>
+        </div>
+        <div class="col-8 text-break">
+            <div class="card-1 bg-white rounded p-3">
+                <h6>
+                    <small>
+                        <span class="text-uppercase text-muted">
+                            source
+                        </span>
+                        <a href="https://tezblock.io/account/{{source}}" class="text-decoration-none" target="_blank">
+                            <strong>{{source}}</strong>
+                        </a>
+                    </small>
+                </h6>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    <!--  -->
+    {{#if isDelegation kind}}
+    <div class="row mb-3">
+        <div class="col-4 text-break text-right align-self-center">
+            <h6>
+                <span class="badge badge-success shadow text-uppercase">
+                    {{kind}}
+                </span>
+            </h6>
+        </div>
+        <div class="col-8 text-break">
+            <div class="card-1 bg-white rounded p-3">
+                <h6>
+                    <small>
+                        <span class="text-uppercase text-muted">
+                            source
+                        </span>
+                        <a href="https://tezblock.io/account/{{source}}" class="text-decoration-none" target="_blank">
+                            <strong>{{source}}</strong>
+                        </a>
+                        <br>
+                        <span class="text-uppercase text-muted">
+                            delegate
+                        </span>
+                        <a href="https://tezblock.io/account/{{delegate}}" class="text-decoration-none" target="_blank">
+                            <strong>{{delegate}}</strong>
+                        </a>
+                    </small>
+                </h6>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    <!--  -->
+    {{/each}}
+</template>
